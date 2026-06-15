@@ -1,0 +1,56 @@
+{% macro render_items(items) -%}
+{% for item in items -%}
+{{ item }}  {# two spaces for a markdown linebreak!! #}
+{% endfor %}
+{% endmacro %}
+
+
+{% macro render_info_panel(panel) %}
+<div markdown="1" class="Panel">
+### {{ panel.title }} 
+{{ render_items(panel.content) }}
+</div>
+{% endmacro %}
+
+{% macro render_panel(panel) %}
+#### {{ panel.title }}
+<div markdown="1" class="Panel">
+{{ render_items(panel.content) }}
+</div>
+{% endmacro %}
+
+
+{% macro render_last_panel(panel) %}
+#### {{ panel.title }} 
+<div markdown="1" class="Panel LastPanel">
+{{ render_items(panel.content) }}
+</div>
+{% endmacro %}
+
+
+{% macro render_entry(entry) %}
+<div markdown="1" class="Entry">
+{{ render_info_panel(entry[0]) }}  {# the first panel is always the info panel #}
+
+{% for panel in entry[1:-1]%}
+{{ render_panel(panel) }}
+{%endfor %}
+
+{{render_last_panel(entry[-1])}}  {# the last panel is always the last panel #}
+
+
+</div>
+{% endmacro %}
+
+
+{%macro render_page(page)%}
+# {{ page.title }}
+
+{% for entry in page.content %}
+{{ render_entry(entry) }}
+{% endfor %}
+
+{% endmacro %}
+
+
+{{render_page(page)}}
