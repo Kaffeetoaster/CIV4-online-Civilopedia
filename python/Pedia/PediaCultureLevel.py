@@ -53,7 +53,7 @@ def placeBuildings(CultureLevel):
         building_name = getHTMLLinkForText(OBuilding)
         
         # Commerce eg Gold, Research, Culture, Espionage Modifiers
-        for CommerceInfo in getCultureCommmerceInfos(OBuilding):
+        for CommerceInfo in getCultureCommerceInfos(OBuilding):
             
             iCommerceModifier = CommerceInfo[0]
             Symbol = getHTMLForFontSymbol(CommerceInfo[1])

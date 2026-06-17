@@ -1,3 +1,4 @@
+
 import xml.etree.ElementTree as ET
 
 import config
@@ -35,8 +36,11 @@ def xml_to_dict(element):
 
 def parse_xml_file(file_path):
     # takes an xml file and returns a parsed representation depending on the root tag
-    tree = ET.parse(file_path)
-    root = tree.getroot()
+    # trying to fix some encoding problems:
+    text = Path(file_path).read_text(encoding="latin-1")
+    root = ET.fromstring(text)
+    # tree = ET.parse(file_path)
+    # root = tree.getroot()
     root_tag = strip_namespace(root.tag)
     
     # Case 1: Civ4GameText -> dict keyed by <Tag>

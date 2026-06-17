@@ -14,6 +14,8 @@ GlobalGameContext = {
     "CONCEPTS": parse_xml_file(config.INPUT_PATH / "Assets/XML/BasicInfos/CIV4BasicInfos.xml"),
     "UNIT_COMBATS": parse_xml_file(config.INPUT_PATH / "Assets/XML/BasicInfos/CIV4UnitCombatInfos.xml"),
     
+    "DOMAINS": parse_xml_file(config.INPUT_PATH.parent.parent / "Assets/XML/BasicInfos/CIV4DomainInfos.xml"),
+    
     # Buildings
     "BUILDINGS": parse_xml_file(config.INPUT_PATH / "Assets/XML/Buildings/CIV4BuildingInfos.xml"),
     "BUILDING_CLASSES": parse_xml_file(config.INPUT_PATH / "Assets/XML/Buildings/CIV4BuildingClassInfos.xml"),
@@ -58,7 +60,7 @@ GlobalGameContext = {
     "TECHS": parse_xml_file(config.INPUT_PATH / "Assets/XML/Technologies/CIV4TechInfos.xml"),
     
     # Terrain 
-    "BONUSES": parse_xml_file(config.INPUT_PATH / "Assets/XML/Terrain/CIV4BonusInfos.xml"),
+    "BONI": parse_xml_file(config.INPUT_PATH / "Assets/XML/Terrain/CIV4BonusInfos.xml"),
     "FEATURES": parse_xml_file(config.INPUT_PATH / "Assets/XML/Terrain/CIV4FeatureInfos.xml"),
     "IMPROVEMENTS": parse_xml_file(config.INPUT_PATH / "Assets/XML/Terrain/CIV4ImprovementInfos.xml"),
     "TERRAINS": parse_xml_file(config.INPUT_PATH / "Assets/XML/Terrain/CIV4TerrainInfos.xml"),
@@ -95,7 +97,7 @@ GlobalGameContext["ART"] = dArtXML
 # Text
 dTextXML = {}
 dTextXMLBase = {}
-for file in Path(config.INPUT_PATH.parent.parent.parent / "Assets/XML/Text/").glob("*.xml"):
+for file in Path(config.INPUT_PATH.parent.parent.parent / "Assets/XML/Text/").rglob("*.xml"):
     dTextXML_temp = parse_xml_file(file)
     dTextXMLBase |= dTextXML_temp
     #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
@@ -103,7 +105,7 @@ dTextXML |= dTextXMLBase
 print(f"Loaded {len(dTextXMLBase)} basegame Text XML entries in total.")
 
 dTextXMLBTS = {}
-for file in Path(config.INPUT_PATH.parent.parent.parent / "Beyond the Sword/Assets/XML/Text/").glob("*.xml"):
+for file in Path(config.INPUT_PATH.parent.parent.parent / "Beyond the Sword/Assets/XML/Text/").rglob("*.xml"):
     dTextXML_temp = parse_xml_file(file)
     dTextXMLBTS |= dTextXML_temp
     #print(f"Loaded {len(dTextXML_temp)} BTS Text XML entries from {file.name}")
@@ -112,7 +114,7 @@ print(f"Loaded {len(dTextXMLBTS)} BTS Text XML entries.")
 
 
 dTextXMLWarlords = {}
-for file in Path(config.INPUT_PATH.parent.parent.parent / "Warlords/Assets/XML/Text/").glob("*.xml"):
+for file in Path(config.INPUT_PATH.parent.parent.parent / "Warlords/Assets/XML/Text/").rglob("*.xml"):
     dTextXML_temp = parse_xml_file(file)
     dTextXMLWarlords |= dTextXML_temp
     #print(f"Loaded {len(dTextXML_temp)} Warlords Text XML entries from {file.name}")
@@ -121,20 +123,33 @@ print(f"Loaded {len(dTextXMLWarlords)} Warlords Text XML entries")
 
 
 dTextXMLMod = {}
-for file in Path(config.INPUT_PATH / "Assets/XML/Text/").glob("*.xml"):
+for file in Path(config.INPUT_PATH / "Assets/XML/Text/").rglob("*.xml"):
     dTextXML_temp = parse_xml_file(file)
     dTextXMLMod |= dTextXML_temp
     #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
 dTextXML |= dTextXMLMod
 print(f"Loaded {len(dTextXMLMod)} Mod Text XMl entries. Now total count is {len(dTextXML)}")
 
-dTextXMLDynamicNames = {}
-for file in Path(config.INPUT_PATH / "Assets/XML/Text/DynamicNames").glob("*.xml"):
-    dTextXML_temp= parse_xml_file(file)
-    dTextXMLDynamicNames |= dTextXML_temp
-    #print(f"Loaded {len(dTextXML_temp)} Dynamic Names Text XML entries from {file.name}")
-dTextXML |= dTextXMLDynamicNames 
-print(f"Loaded {len(dTextXMLDynamicNames)} Dynamic Names Text XMl entries. Now total count is {len(dTextXML)}")
+# dTextXMLMod = {}
+# for file in Path(config.INPUT_PATH / "Assets/XML/Text/DynamicNames").glob("*.xml"):
+#     dTextXML_temp = parse_xml_file(file)
+#     dTextXMLMod |= dTextXML_temp
+#     #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
+# dTextXML |= dTextXMLMod
+# print(f"Loaded {len(dTextXMLMod)} Dynamic Names Text XMl entries. Now total count is {len(dTextXML)}")
+
+# dTextXMLMod = {}
+# for file in Path(config.INPUT_PATH / "Assets/XML/Text/External").glob("*.xml"):
+#     try:
+#         dTextXML_temp = parse_xml_file(file)
+#         dTextXMLMod |= dTextXML_temp
+#         #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
+#     except Exception as e:
+#         print(f"Error parsing {file.name}: {e}")
+# dTextXML |= dTextXMLMod
+# print(f"Loaded {len(dTextXMLMod)} External Text XMl entries. Now total count is {len(dTextXML)}")
+
+
 
 GlobalGameContext["TEXT"] = dTextXML
 
@@ -151,7 +166,30 @@ SYMBOLS = {
     "COMMERCE_CULTURE_CHAR": {"ID": "05_02","display":"culture"}, 
     "COMMERCE_ESPIONAGE_CHAR": {"ID": "05_03","display":"espionage"},
     
-    "HAPPY_CHAR": {"ID": "12_00", "display": "happy"}, 
+    "RELIGION_JUDAISM_CHAR": {"ID": "07_00", "display": "judanism"},
+    "RELIGION_JUDAISM_STATE_CHAR": {"ID": "07_01", "display": "judaism"},
+    "RELIGION_ORTHODOXY_CHAR": {"ID": "07_02", "display": "orthodoxy"},
+    "RELIGION_ORTHODOXY_STATE_CHAR": {"ID": "07_05", "display": "orthodoxy"},
+    "RELIGION_CATHOLICISM_CHAR": {"ID": "07_06", "display": "catholicism"},
+    "RELIGION_CATHOLICISM_STATE_CHAR": {"ID": "07_07", "display": "catholicism"},
+    "RELIGION_PROTESTANTISM_CHAR": {"ID": "07_08", "display": "protestantism"},
+    "RELIGION_PROTESTANTISM_STATE_CHAR": {"ID": "07_09", "display": "protestantism"},
+    "RELIGION_ISLAM_CHAR": {"ID": "07_10", "display": "islam"},
+    "RELIGION_ISLAM_STATE_CHAR": {"ID": "07_11", "display": "islam"},
+    "RELIGION_HINDUISM_CHAR": {"ID": "07_12", "display": "hinduism"},
+    "RELIGION_HINDUISM_STATE_CHAR": {"ID": "07_13", "display": "hinduism"},
+    "RELIGION_BUDDHISM_CHAR": {"ID": "07_14", "display": "buddhism"},
+    "RELIGION_BUDDHISM_STATE_CHAR": {"ID": "07_15", "display": "buddhism"},
+    "RELIGION_CONFUCIANISM_CHAR": {"ID": "07_16", "display": "confucianism"},
+    "RELIGION_CONFUCIANISM_STATE_CHAR": {"ID":"07_17", "display": "confucianism"},
+    "RELIGION_TAOISM_CHAR": {"ID": "07_18", "display": "taoism"},
+    "RELIGION_TAOISM_STATE_CHAR": {"ID": "07_20", "display": "taoism"},
+    "RELIGION_ZOROASTRIANISM_CHAR": {"ID": "07_21", "display": "zoroastrianism"},
+    "RELIGION_ZOROASTRIANISM_STATE_CHAR": {"ID": "07_22", "display": "zoroastrianism"},
+
+
+
+    "HAPPY_CHAR": {"ID": "12_00", "display": "happy"},
 	"UNHAPPY_CHAR": {"ID": "12_01", "display": "unhappy"},
 	"HEALTHY_CHAR": {"ID": "12_02", "display": "healthy"},
 	"UNHEALTHY_CHAR": {"ID": "12_03", "display": "unhealthy"},
@@ -213,6 +251,11 @@ GlobalGameContext["FONT_SYMBOLS_75"] = FONTSYMBOLS_75
 # GlobalGameContext["FONT_SYMBOLS"] = FONTSYMBOLS
 
 GlobalGameContext["SYMBOLS"] = SYMBOLS
+
+### Constants
+TEMPLES_NEEDED_MULTIPLIKATOR = 2 # Temples for Cathedrals
+
+
 
 
 # Preprocessing
