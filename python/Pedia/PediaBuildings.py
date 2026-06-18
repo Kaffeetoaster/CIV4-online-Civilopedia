@@ -368,6 +368,10 @@ def placeEffects(OBuilding):
     # extra production speed for domain
     for Modifier in getDomainProductionModifiers(OBuilding):
         Effects.append(Modifier)
+    # extra production speed for all military units
+    iMilitaryProductionModifier = int(OBuilding.get("iMilitaryProductionModifier", 0))
+    if iMilitaryProductionModifier > 0:
+        Effects.append(f"+{iMilitaryProductionModifier}% Military Unit Production in this City")
         
     # obsolets
     ObsoleteTech = GC["TECHS"].get(OBuilding.get("ObsoleteTech", None), None)
