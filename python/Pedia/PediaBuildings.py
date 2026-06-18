@@ -252,12 +252,18 @@ def placeEffects(OBuilding):
         UnitTag = GC["UNIT_CLASSES"].get(GreatPeopleUnitClass,{}).get("DefaultUnit", "")
         link = getHTMLLinkForText(GC["UNITS"].get(UnitTag, None))
         Effects.append(f"+{iGreatPeopleRateChange} {Symbol} for {link}")
+        
+    iGreatPeopleRateModifier = int(OBuilding.get("iGreatPeopleRateModifier", 0))
+    if iGreatPeopleRateModifier > 0:
+        Symbol = getHTMLForFontSymbol("GREAT_PEOPLE_CHAR")
+        Effects.append(f"+{iGreatPeopleRateModifier}% {Symbol} Birth Rate")
     
     # Specialits
     for Change in getSpecialistCount(OBuilding):
         Effects.append(Change)
     for Change in getFreeSpecialistCounts(OBuilding):
         Effects.append(Change)
+    
     
     # Free Promotions
     FreePromotion = GC["PROMOTIONS"].get(OBuilding.get("FreePromotion", ""), None)
@@ -390,7 +396,11 @@ def placeEffects(OBuilding):
     # free specialists
     iFreeSpecialist = int(OBuilding.get("iFreeSpecialist", 0))
     if iFreeSpecialist > 0:
-        Effects.append(f"+{iFreeSpecialist} Free Specialists")
+        Effects.append(f"+{iFreeSpecialist} Free Specialist(s)")
+    iGlobalFreeSpecialist = int(OBuilding.get("iGlobalFreeSpecialist", 0))
+    if iGlobalFreeSpecialist > 0:
+        Effects.append(f"+{iGlobalFreeSpecialist} Free Specialist(s) in all cities")
+    
         
     # extra Commerce per Specialist 
     for CommerceModifier in getSpecialistExtraCommerces(OBuilding):
