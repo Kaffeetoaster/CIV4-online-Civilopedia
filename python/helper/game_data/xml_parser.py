@@ -91,8 +91,8 @@ print(f"file index built with {len(file_index)} entries.")
 def stringify_dict(dict):
     return {str(key): str(value) for key, value in dict.items()}
 
-with open("data.json", "w") as f:
-    json.dump(stringify_dict(file_index), f, indent=2)
+# with open("data.json", "w") as f:
+#     json.dump(stringify_dict(file_index), f, indent=2)
     
 
 def get_external_path(path):
@@ -148,7 +148,7 @@ def convert_button_image(button_info, file_name):
     output_path = config.OUTPUT_PATH / f"Assets/Art/Interface/Buttons/{file_name}.png"
     os.makedirs(output_path.parent, exist_ok=True)
     img.save(output_path)
-    return output_path
+    return f"Assets/Art/Interface/Buttons/{file_name}.png"
 
 def resolve_button_path(ObjectValues, new_file_name):
     if "Button" not in ObjectValues:

@@ -47,7 +47,7 @@ def getHTMLForFontSymbol(symbol_key):
     if symbol != None:
         source = f"glyph_r{symbol.get('ID', symbol_key)}.png"
         name = symbol.get("display", symbol_key)
-    return f'<img src="/Assets/Symbols/font_75/{source}" alt="{name}" class="Symbol">'
+    return f'<img src="../../Assets/Symbols/font_75/{source}" alt="{name}" class="Symbol">'
     
 def getHTMLLinkForText(OGameObject):
     if OGameObject is None:
@@ -55,7 +55,7 @@ def getHTMLLinkForText(OGameObject):
     else:
         text = get_text(OGameObject.get("Description", ""))
         Category = getPediaCategory(OGameObject)
-        link = f"/Categories/{Category}/#{text.replace(" ", "-").lower()}" 
+        link = f"../../Categories/{Category}/#{text.replace(" ", "-").lower()}" 
     return f'<a class="text-link" href="{link}" title="{text}">{text}</a>'
 
 def getPediaCategory(OGameObject):
@@ -98,32 +98,12 @@ def getHTMLLinkForButton(OGameObject):
             button_path = OGameObject.get("Button", "")
         else:
             button_path = ""
-    if button_path != "":
-        button_path = str(Path(button_path).relative_to(OUTPUT_PATH))
+    button_path = f"../../{button_path}"
     text = get_text(OGameObject.get("Description", "")) 
     Category = getPediaCategory(OGameObject)
-    link = f"/Categories/{Category}/#{text.replace(" ", "-").lower()}"
+    link = f"../../Categories/{Category}/#{text.replace(" ", "-").lower()}"
         
-    return f'<a href="{link}" title="{text}"><img src="/{button_path}" alt="{text}">  </a>'
-
-
-### GameObject help
-
-def getBuildingHelp(OBuilding):
-    Entry = []
-    return Entry
-
-
-def getUnitHelp(OUnit):
-    Entry = []
-    return Entry
-
-
-
-
-
-
-
+    return f'<a href="{link}" title="{text}"><img src="{button_path}" alt="{text}">  </a>'
 
 
 ### styling
@@ -131,11 +111,6 @@ def getUnitHelp(OUnit):
 def addBulletpoints(contentList):
     dot = getHTMLForFontSymbol("BULLET_CHAR")
     return [f"{dot} {item}" for item in contentList]
-
-
-
-
-
 
 
 

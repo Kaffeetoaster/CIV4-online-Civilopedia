@@ -130,24 +130,7 @@ for file in Path(config.INPUT_PATH / "Assets/XML/Text/").rglob("*.xml"):
 dTextXML |= dTextXMLMod
 print(f"Loaded {len(dTextXMLMod)} Mod Text XMl entries. Now total count is {len(dTextXML)}")
 
-# dTextXMLMod = {}
-# for file in Path(config.INPUT_PATH / "Assets/XML/Text/DynamicNames").glob("*.xml"):
-#     dTextXML_temp = parse_xml_file(file)
-#     dTextXMLMod |= dTextXML_temp
-#     #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
-# dTextXML |= dTextXMLMod
-# print(f"Loaded {len(dTextXMLMod)} Dynamic Names Text XMl entries. Now total count is {len(dTextXML)}")
 
-# dTextXMLMod = {}
-# for file in Path(config.INPUT_PATH / "Assets/XML/Text/External").glob("*.xml"):
-#     try:
-#         dTextXML_temp = parse_xml_file(file)
-#         dTextXMLMod |= dTextXML_temp
-#         #print(f"Loaded {len(dTextXML_temp)} Text XML entries from {file.name}")
-#     except Exception as e:
-#         print(f"Error parsing {file.name}: {e}")
-# dTextXML |= dTextXMLMod
-# print(f"Loaded {len(dTextXMLMod)} External Text XMl entries. Now total count is {len(dTextXML)}")
 
 
 
