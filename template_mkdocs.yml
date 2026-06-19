@@ -1,0 +1,24 @@
+site_name: CivIV Online Civilopedia
+site_description: An online version of the Civ4 Civilopedia, generated from the original XML files.
+site_author: 
+theme: 
+  name: readthedocs  # Using the built-in standard theme
+  navigation_depth: 2
+
+extra_css:
+  - style.css
+
+markdown_extensions:
+  - md_in_html
+
+
+nav:
+  - 'About': index.md
+  - 'Culture Levels': Categories/CultureLevels.md
+  - 'Buildings': Categories/Buildings.md
+  - 'Religious Buildings': Categories/ReligiousBuildings.md
+  - 'Unique Buildings': Categories/UniqueBuildings.md
+  - 'Great People Buildings': Categories/GreatPeopleBuildings.md
+  - 'National Wonders': Categories/NationalWonders.md
+  - 'Great Wonders': Categories/GreatWonders.md
+    
