@@ -2,7 +2,7 @@
 import xml.etree.ElementTree as ET
 
 import config
-from python.helper.measure_duration import measure, start_new_log
+from Deprecated.python.helper.measure_duration import measure, start_new_log
 
 from PIL import Image
 from pathlib import Path

@@ -5,7 +5,7 @@ from enum import Enum, auto
 import config
 from python.helper.game_data.xml_parser import parse_xml_file, resolve_button_path
 from python.helper.game_data.extractFontSymbols import *
-from python.helper.measure_duration import measure, start_new_log
+from Deprecated.python.helper.measure_duration import measure, start_new_log
 from python.gameContext.preprocess import add_index
 
 ### load xml infos ###

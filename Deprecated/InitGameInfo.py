@@ -1,5 +1,5 @@
 
-from python.helper.measure_duration import measure, start_new_log
+from Deprecated.python.helper.measure_duration import measure, start_new_log
 import importlib
 
 
