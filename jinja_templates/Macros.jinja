@@ -1,0 +1,35 @@
+{% macro render_items(items) %}
+{% for item in items %}
+{{ item }}  {# two spaces for a markdown linebreak!! #}
+{% endfor %}
+{% endmacro %}
+
+
+{% macro render_panel(panel) %}
+<div markdown="1" class="Panel">
+#### {{ panel.title }}
+{{ render_items(panel.content) }}
+</div>
+{% endmacro %}
+
+
+{% macro render_entry(entry) %}
+<div markdown="1" class="Entry">
+### {{ entry.title }}
+{% for panel in entry%}
+{{ render_panel(panel) }}
+{%endfor %}
+
+</div>
+{% endmacro %}
+
+
+{%macro render_page(page)%}
+# {{ page.title }}
+
+{% for entry in page.content %}
+{{ render_entry(entry) }}
+{% endfor %}
+
+{% endmacro %}
+
