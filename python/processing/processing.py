@@ -263,6 +263,9 @@ def buildHTMLForSymbol(SymbolID):
     Given a symbol ID, return HTML code to display the symbol.
     """
     source = f"{SymbolID}.png"
+    if not (config.OUTPUT_PATH / f"Assets/Symbols/{source}").exists():
+        return f"&#x{SymbolID};"
+    
     return f'<img src="../../Assets/Symbols/{source}" alt="{SymbolID}" class="Symbol">'
     
     pass
