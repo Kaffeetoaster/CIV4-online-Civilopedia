@@ -66,7 +66,7 @@ def buildCivilopediaData():
                 # if there is no panel before, like for the Culture Levels, attach the infos to the listbox panel.
                 if panel_data.get("type", "") == "listbox":
                     panel_data["content"].pop(0) # remove the first element, since it should contain the title too.
-                    texts = [content.get("text", "") for content in panel_data["content"]]
+                    texts = [content.get("text", "") for content in panel_data["content"] if content.get("text", "") not in ["", "<font=3></font>"]]
                     text = resolveTextFormatting(", ".join(texts), linkLookup)
                     if entry.PageContent != []:
                         entry.PageContent[0].PanelContent += text
@@ -82,9 +82,12 @@ def buildCivilopediaData():
                         elif contentType == "button":
                             
                             datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
-                            Panelcontent += buildHTMLForButton(datapoint)
                             if panel_data["title"] == "":
-                                panel_data["title"] = entry_data["title"]  # set the title of the panel to the title of the entry, if it is a button panel
+                                panel_data["title"] = buildHTMLForButton(datapoint)  # add button to title for the info panel
+                                panel_data["title"] += " "
+                            else:
+                                Panelcontent += buildHTMLForButton(datapoint)
+                            
                         elif contentType == "buttonlink":
                             datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
                             Panelcontent += buildHTMLLinkForButton(datapoint)
@@ -94,7 +97,7 @@ def buildCivilopediaData():
                 if Panelcontent != "" or panel_data["title"] != "":
                     panel = CivilopediaData.Panel(title=panel_data["title"], PanelContent=Panelcontent)
                     entry.PageContent.append(panel)
-            entry.PageContent[0].title = entry_data["title"]  # set the title of the first panel to the title of the entry
+            entry.PageContent[0].title += entry_data["title"]  # set the title of the first panel to the title of the entry
             category.entries.append(entry)
         
         civilopedia.Categories.append(category)
