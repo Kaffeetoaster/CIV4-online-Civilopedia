@@ -101,7 +101,9 @@ def buildHTMLLinkForButton(button):
     categoryName,entryName = button["link"].split("#")
     link = f"../../Categories/{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
     text = entryName.replace('-', ' ')
-    return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}">  </a>'
+    return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a>'
+    #text = button.get("preview-text", "")
+    #return f'<div class="button-with-preview"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a><div class="preview-text">{text}</div></div>'
 
 def buildHTMLForButton(button):   
     """
@@ -119,7 +121,7 @@ def buildLinkLookup(CivilopediaData):
     """
     dict_linkLookup = {}
     for category in CivilopediaData["Categories"]:
-        for entry in category["Entries"]:
+        for entry in category.get("Entries", []):
             link = f"{category['Category'].replace(' ', '-')}/#{entry['title'].replace(' ', '-')}"
             dict_linkLookup[entry["title"]] = link
     return dict_linkLookup
@@ -277,5 +279,5 @@ def generateTOC(gamedata):
     """
     Given the (raw or processed)gamedata, generate a table of contents for use in mkdocs.yml.
     """
-    
+    # TODO: implement this function
     pass
