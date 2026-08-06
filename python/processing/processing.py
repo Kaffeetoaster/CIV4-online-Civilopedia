@@ -97,26 +97,46 @@ def convertButtonImage(button, buttonLookup):
 def buildHTMLLinkForButton(button):
     """
     Given a button, return HTML code to display the button. This includes a link to the entry.
+    If the button has a postion and size, these will be considered in the HTML code.
     """
+    # TODO: add preview here
     categoryName,entryName = button["link"].split("#")
     link = f"../../Categories/{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
     text = entryName.replace('-', ' ')
-    return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a>'
+    
+    style =""
+    if button.get("x",-1)!=-1 and button.get("y",-1)!=-1 and button.get("width",-1)!=-1 and button.get("height",-1)!=-1:
+        x = button["x"]
+        y = button["y"]
+        width = button["width"]
+        height = button["height"]
+        style = f"position:absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px;"
+    return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a>'
+    
     #text = button.get("preview-text", "")
     #return f'<div class="button-with-preview"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a><div class="preview-text">{text}</div></div>'
 
 def buildHTMLForButton(button):   
     """
     Given a button, return HTML code to display the button. This does not include a link to the entry.
+    If the button has a postion and size, these will be considered in the HTML code.
     """
+    #TODO: add preview here
     text = Path(button["source"]).stem
-    return f'<img src="../../Assets/{button["source"]}" alt="{text}"> '
+    style =""
+    if button.get("x",-1)!=-1 and button.get("y",-1)!=-1 and button.get("width",-1)!=-1 and button.get("height",-1)!=-1:
+        x = button["x"]
+        y = button["y"]
+        width = button["width"]
+        height = button["height"]
+        style = f"position:absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px;"
+    return f'<img src="../../Assets/{button["source"]}" alt="{text}" style="{style}">'
 
 ## text link processing functions
 
 def buildLinkLookup(CivilopediaData):
     """
-    Build a lookup table for links. Mapping is from a Entry name like "The Americans" to the link.
+    Build a lookup table for links. Mapping is from a Entry name like "The Americans" to the link eg "Civilizations#the-americans".
     Walks over each Category in the raw Civilopedia data and mapps each entry name to the link "Category/#Entry-Name"
     """
     dict_linkLookup = {}
@@ -128,10 +148,14 @@ def buildLinkLookup(CivilopediaData):
     
 
 def buildHTMLLinkForText(text, linkLookup):
-    
+    # TODO: add preview here
     link = f"../../Categories/{linkLookup.get(text)}" 
     return f'<a class="text-link" href="{link}" title="{text}">{text}</a>'
 
+def buildHTMLLinkForTechName(techName, linkLookup):
+    # TODO: add preview here
+    link = f"../../Categories/{linkLookup.get(techName)}" 
+    return f'<a class="title-link" href="{link}" title="{techName}">{techName}</a>'
 
 ## text formatting functions
 
