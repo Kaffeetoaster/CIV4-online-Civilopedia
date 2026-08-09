@@ -100,6 +100,8 @@ def buildHTMLLinkForButton(button):
     If the button has a postion and size, these will be considered in the HTML code.
     """
     # TODO: add preview here
+    if button.get("link", "") == "":
+        return buildHTMLForButton(button)
     categoryName,entryName = button["link"].split("#")
     link = f"../../Categories/{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
     text = entryName.replace('-', ' ')
@@ -152,10 +154,14 @@ def buildHTMLLinkForText(text, linkLookup):
     link = f"../../Categories/{linkLookup.get(text)}" 
     return f'<a class="text-link" href="{link}" title="{text}">{text}</a>'
 
-def buildHTMLLinkForTechName(techName, linkLookup):
-    # TODO: add preview here
-    link = f"../../Categories/{linkLookup.get(techName)}" 
-    return f'<a class="title-link" href="{link}" title="{techName}">{techName}</a>'
+def buildHTMLForTechBoxLabel(TechBoxLabel):
+    
+    x = TechBoxLabel["x"]
+    y = TechBoxLabel["y"]
+    style = f"position:absolute; left: {x}px; top: {y}px;"
+    
+    return f'<span class="tech-box-label" style="{style}">{TechBoxLabel["text"]}</span>'
+
 
 ## text formatting functions
 

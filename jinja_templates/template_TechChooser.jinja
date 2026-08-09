@@ -1,7 +1,7 @@
 
 
 {% macro render_tech(tech)%}
-<div markdown="1" class="TechBox" style="left:{{tech.x}}px;top:{{tech.y}}px;width:{{tech.width}}px;height:{{tech.height}}px;">
+<div markdown="1" class="Panel TechBox" style="position: absolute; left:{{tech.x}}px; top:{{tech.y}}px; width:{{tech.width}}px; height:{{tech.height}}px;">
 
 {{ tech.TechBoxContent }} {# contains, the tech name, tech icon and tech effects#}
 
@@ -13,14 +13,18 @@
 
 {%macro render_TechTree(TechTree)%}
 # Tech Tree
-<div markdown="1" class="TechTree">
+<div markdown="1" class="Entry TechTree">
+<div markdown="1" class="TechTreeCanvas" style="position: relative; width:{{TechTree.width}}px; height:{{TechTree.width}}px;">
 
 {% for tech in TechTree.techs %}
 {{ render_tech(tech) }}
 {% endfor %}
 
-{{ TechTree.Arrows }} {# contains the arrows between the techs #}
+{% for arrow in TechTree.Arrows %}
+{{ arrow }} {# contains the arrows between the techs #}
+{% endfor %} 
 
+</div>
 </div>
 {% endmacro %}
 
