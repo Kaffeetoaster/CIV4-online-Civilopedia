@@ -36,7 +36,7 @@ def loadButtonFromAtlas(atlas_info, buttonLookup):
     """
     Given an atlas info, load the button image from the atlas.
     """
-    atlas_path = buttonLookup.get(atlas_info[0].lower(), "")
+    atlas_path = buttonLookup.get(str(atlas_info[0]).lower(), "")
     if atlas_path == "":
         print(f"Atlas path not found for {atlas_info[0]}.")
         return None
@@ -51,15 +51,16 @@ def convertButtonImage(button, buttonLookup):
     
     Returns the new path to the button image.
     """
+    source = str(button.get("source", "")).split(",")
     
-    source = button.get("source", "").split(",")
+    
     
     if len(source)==5: # atlas info with leading comma   
         button_info = source[2:]
-        file_path = f"Art/Interface/Atlas/{Path(source[2]).stem}_{source[3]}_{source[4]}.png"
+        file_path = Path(f"Art/Interface/Atlas/{Path(source[2]).stem}_{source[3]}_{source[4]}.png")
     elif len(source)==4: # atlas info
         button_info = source[1:]
-        file_path = f"Art/Interface/Atlas/{Path(source[1]).stem}_{source[2]}_{source[3]}.png"    
+        file_path = Path(f"Art/Interface/Atlas/{Path(source[1]).stem}_{source[2]}_{source[3]}.png")    
     elif len(source)==2: # weird path 
         button_info = source[1]
         file_path = Path(source[1]).with_suffix(".png")
@@ -68,28 +69,29 @@ def convertButtonImage(button, buttonLookup):
         file_path = Path(source[0]).with_suffix(".png")
         
     if button_info == "" or button_info is None:
-        return None
+        print(f"Button info is empty for button {button}.")
+        return ""
     
     if type(button_info) is list:
         # load button from atlas
         img = loadButtonFromAtlas(button_info, buttonLookup)
         if img is None:
             print(f"Could not load button from atlas {button_info}.")
-            return None
+            return ""
     else:
-        absolute_button_path = buttonLookup.get(button_info.lower(), "")
+        absolute_button_path = buttonLookup.get(str(button_info).lower(), "")
         if absolute_button_path == "":
             print(f"Button path not found for {button_info}.")
-            return None
+            return ""
         img = Image.open(absolute_button_path)
     
     if button.get("link", "") != "":
-        file_path = f"Art/Interface/{button['link'].replace('#', '/').replace(' ', '-')}.png"
+        file_path = Path(f"Art/Interface/{button['link'].replace('#', '/').replace(' ', '-')}.png")
     
     output_path = config.OUTPUT_PATH / "Assets" / file_path
     output_path.parent.mkdir(parents=True, exist_ok=True)
     img.save(output_path)
-    return file_path
+    return str(file_path)
     
 
 ## Button link processing functions
@@ -124,7 +126,11 @@ def buildHTMLForButton(button):
     If the button has a postion and size, these will be considered in the HTML code.
     """
     #TODO: add preview here
-    text = Path(button["source"]).stem
+    try:
+        text = Path(button["source"]).stem
+    except Exception as e:
+        #print(f"Error getting button source: {e}. Button: {button}")
+        text = ""
     style =""
     if button.get("x",-1)!=-1 and button.get("y",-1)!=-1 and button.get("width",-1)!=-1 and button.get("height",-1)!=-1:
         x = button["x"]

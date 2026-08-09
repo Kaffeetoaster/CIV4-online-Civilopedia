@@ -15,7 +15,6 @@ start_new_log()
 TEMPLATE_DIR = Path(__file__).resolve().parent / "jinja_templates"
 
 
-
 def renderCategory(PageInfos, result_file, template_name= "template_page.jinja"):
 	environment = Environment(loader=FileSystemLoader(str(TEMPLATE_DIR)))
  
@@ -23,6 +22,13 @@ def renderCategory(PageInfos, result_file, template_name= "template_page.jinja")
 	rendered_html = template.render(page = PageInfos)
 	result_file.write_text(rendered_html, encoding="utf-8")
 
+def renderUpgradeTrees(Civilopedia):
+	for UpgradeTree in Civilopedia.UpgradeTrees:
+		print(f"Rendering UpgradeTree {UpgradeTree.title}...")
+		result_file = OUTPUT_PATH/ "Categories" / f"{UpgradeTree.title.replace(' ', '-')}.md"
+		
+		renderCategory(UpgradeTree, result_file, template_name= "template_UpgradeTree.jinja")
+		print(f"Finished rendering UpgradeTree {UpgradeTree.title}. Result saved to {result_file}")
 
 def renderCategories(Civilopedia):
 	for category in Civilopedia.Categories:
@@ -31,6 +37,8 @@ def renderCategories(Civilopedia):
 		
 		renderCategory(category, result_file)
 		print(f"Finished rendering category {category.title}. Result saved to {result_file}")
+
+
 
 def renderTechChooser(TechTree, result_file = OUTPUT_PATH / "Categories" / "Tech-Tree.md", template_name= "template_TechChooser.jinja"):
 	print(f"Rendering TechChooser {TechTree.title}...")
@@ -79,19 +87,20 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 				datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
 				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint)
 			elif contentType == "TechBoxLabel":
-				# since TechBoxLabel coordinates are not realtive to the TechBox, we need to adjust them.
+				# since TechBoxLabel coordinates are not relative to the TechBox, we need to adjust them.
 				datapoint["x"] -= TechBox.x
 				datapoint["x"] += 2 # padding so the Label is aligned with the TechBox content
 				datapoint["y"] -= TechBox.y
 				TechBox.TechBoxContent += buildHTMLForTechBoxLabel(datapoint)
 		TechTree.techs.append(TechBox)
 			
-		# for arrow in raw_TechTreeData.get("Arrows", []):
-		# 	arrow["source"] = convertButtonImage(arrow, buttonLookup)
-		# 	TechTree.arrows += buildHTMLForButton(arrow)
+	for arrow in raw_TechTreeData.get("Arrows", []):
+		arrow["source"] = convertButtonImage(arrow, buttonLookup)
+		TechTree.arrows.append(buildHTMLForButton(arrow))
 			
 			
 	return TechTree
+
 
 
 def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup=None, PreviewLookup=None):
@@ -101,8 +110,21 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 	for category_data in raw_CivilopediaData["Categories"]:
 		if category_data.get("Entries", []) == []:
 			continue
+		# handle UpgradeTree category separately, since it has a different structure than the other categories
+		if category_data.get("CategoryType", "") == "UpgradeTree":
+			UpgradeTree = CivilopediaData.UpgradeTree(title=category_data["Category"])
+			TreeContent = ""
+			for element in category_data["Entries"][0]["PageContent"][0]["content"]:
+				UpgradeTree.width = max(UpgradeTree.width, element["x"] + element["width"])
+				UpgradeTree.height = max(UpgradeTree.height, element["y"] + element["height"])
+				if element.get("type", "") == "buttonlinkAt":
+					element["source"] = convertButtonImage(element, buttonLookup)
+					TreeContent += buildHTMLLinkForButton(element)
+			UpgradeTree.content = TreeContent
+			civilopedia.UpgradeTrees.append(UpgradeTree)
+			continue
+	 
 		category = CivilopediaData.Category(title=category_data["Category"])
-		
 		for entry_data in category_data["Entries"]:
 			entry = CivilopediaData.Entry(title=entry_data["title"])
 			
@@ -169,11 +191,12 @@ if __name__ == "__main__":
 	print("Finished loading raw data and preparing lookups.")
 	
 	
-	
 	# building CivilopediaData ...
 	CivilopediaData_processed = measure(buildCivilopediaData, raw_CivilopediaData, buttonLookup, linkLookup, PreviewLookup)
 	measure(renderCategories, CivilopediaData_processed)
-
+	measure(renderUpgradeTrees, CivilopediaData_processed)
+	
 	# building TechTreeData ...
 	TechTreeData_processed = measure(buildTechTreeData, raw_TechTreeData, buttonLookup,linkLookup, PreviewLookup)
+	print(f"TechTree contains {len(TechTreeData_processed.techs)} techs and {len(TechTreeData_processed.arrows)} arrows.")
 	measure(renderTechChooser, TechTreeData_processed)

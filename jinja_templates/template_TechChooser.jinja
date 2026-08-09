@@ -16,13 +16,16 @@
 <div markdown="1" class="Entry TechTree">
 <div markdown="1" class="TechTreeCanvas" style="position: relative; width:{{TechTree.width}}px; height:{{TechTree.width}}px;">
 
+{% for arrow in TechTree.arrows %}
+{{ arrow }} {# contains the arrows between the techs #}
+{% endfor %} 
+
+
 {% for tech in TechTree.techs %}
 {{ render_tech(tech) }}
 {% endfor %}
 
-{% for arrow in TechTree.Arrows %}
-{{ arrow }} {# contains the arrows between the techs #}
-{% endfor %} 
+
 
 </div>
 </div>

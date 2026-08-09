@@ -1,0 +1,17 @@
+
+
+{%macro render_UpgradeTree(UpgradeTree)%}
+# {{ UpgradeTree.title }}
+<div markdown="1" class="Entry UpgradeTree">
+<div markdown="1" class="UpgradeTreeCanvas" style="position: relative; width:{{UpgradeTree.width}}px; height:{{UpgradeTree.height}}px;">
+
+{{ UpgradeTree.content }} {# contains the upgrade tree content, including the Units/Promotions and arrows #}
+
+</div>
+</div>
+{% endmacro %}
+
+
+
+
+{{render_UpgradeTree(page)}}
