@@ -96,36 +96,42 @@ def convertButtonImage(button, buttonLookup):
 
 ## Button link processing functions
 
-def buildHTMLLinkForButton(button):
+def buildHTMLLinkForButton(button, isTree = False):
     """
     Given a button, return HTML code to display the button. This includes a link to the entry.
     If the button has a postion and size, these will be considered in the HTML code.
     """
-    # TODO: add preview here
     if button.get("link", "") == "":
         return buildHTMLForButton(button)
     categoryName,entryName = button["link"].split("#")
-    link = f"../../Categories/{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
+    shortLink = f"{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
+    link = f"../../Categories/{shortLink}"
     text = entryName.replace('-', ' ')
     
     style =""
-    if button.get("x",-1)!=-1 and button.get("y",-1)!=-1 and button.get("width",-1)!=-1 and button.get("height",-1)!=-1:
+    if isTree:
         x = button["x"]
         y = button["y"]
         width = button["width"]
         height = button["height"]
-        style = f"position:absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px;"
-    return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a>'
+        buttonstyle = f"width: {width}px; height: {height}px;"
+        containerstyle = f"position:absolute; left: {x}px; top: {y}px; "
+    previewText = resolveTextFormatting(button.get("previewText", ""), isPreview=True)
+    if previewText != "" and isTree:
+        return f'<span class="button-with-preview" style="{containerstyle}"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}"></a><span class="preview-text">{previewText}</span></span>'
+    elif previewText != "" and not isTree:
+        return f'<span class="button-with-preview"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a><span class="preview-text">{previewText}</span></span>'
+    elif previewText =="":
+        return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a>'
     
-    #text = button.get("preview-text", "")
-    #return f'<div class="button-with-preview"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a><div class="preview-text">{text}</div></div>'
-
+    
+    
+    
 def buildHTMLForButton(button):   
     """
     Given a button, return HTML code to display the button. This does not include a link to the entry.
     If the button has a postion and size, these will be considered in the HTML code.
     """
-    #TODO: add preview here
     try:
         text = Path(button["source"]).stem
     except Exception as e:
@@ -150,18 +156,41 @@ def buildLinkLookup(CivilopediaData):
     dict_linkLookup = {}
     for category in CivilopediaData["Categories"]:
         for entry in category.get("Entries", []):
-            link = f"{category['Category'].replace(' ', '-')}/#{entry['title'].replace(' ', '-')}"
+            link = f"{category['Category'].replace(' ', '-')}/#{entry['title'].replace(' ', '-').lower()}"
             dict_linkLookup[entry["title"]] = link
     return dict_linkLookup
-    
 
-def buildHTMLLinkForText(text, linkLookup):
-    # TODO: add preview here
-    link = f"../../Categories/{linkLookup.get(text)}" 
-    return f'<a class="text-link" href="{link}" title="{text}">{text}</a>'
+def buildPreviewLookup(CivilopediaData):
+    """
+    Walks over each content element in the Civilopedia and maps its modifed link to its previewText, if it has one.
+    This also formats the previewText.
+    """
+    dict_previewLookup = {}
+    for category in CivilopediaData["Categories"]:
+        for entry in category.get("Entries", []):
+            for panel in entry.get("PageContent", []):
+                for content in panel.get("content", []):
+                    if content.get("link", "") != "" and content.get("previewText", "") != "":
+                        categoryName,entryName = content["link"].split("#")
+                        shortLink = f"{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
+                        dict_previewLookup[shortLink] = resolveTextFormatting(content["previewText"], isPreview=True)
+    return dict_previewLookup
+
+
+
+def buildHTMLLinkForText(text, linkLookup, previewLookup):
+    
+    link = linkLookup.get(text, "")
+    previewText = previewLookup.get(link, "")
+    link = f"../../Categories/{link}"
+    
+    if previewText != "":
+        return f'<span class="button-with-preview"><a class="text-link" href="{link}" title="{text}">{text}</a><span class="preview-text">{previewText}</span></span>'
+    else:
+        return f'<a class="text-link" href="{link}" title="{text}">{text}</a>'
+
 
 def buildHTMLForTechBoxLabel(TechBoxLabel):
-    
     x = TechBoxLabel["x"]
     y = TechBoxLabel["y"]
     style = f"position:absolute; left: {x}px; top: {y}px;"
@@ -171,7 +200,7 @@ def buildHTMLForTechBoxLabel(TechBoxLabel):
 
 ## text formatting functions
 
-def resolveTextFormatting(text, linkLookup):
+def resolveTextFormatting(text, linkLookup = {}, previewLookup = {}, isPreview=False):
     """
     Given a textstring, resolve the formatting and return the formatted text.
     Result should be a string with HTML formatting.
@@ -231,17 +260,34 @@ def resolveTextFormatting(text, linkLookup):
     SymbolIDs = re.findall(r"\\u([0-9a-fA-F]{4})", text)
     
     # replace links in the text like <link=literal>Artist</link>
-    
-    text = re.sub(
-        r"<link=literal>(.*?)</link>",
-        lambda match: buildHTMLLinkForText(match.group(1), linkLookup),
-        text
-    )
-    text = re.sub(
-            r"<link='literal'>(.*?)</link>",
-            lambda match: buildHTMLLinkForText(match.group(1), linkLookup),
+    if isPreview:
+        text = re.sub(
+            r"<link=literal>(.*?)</link>",
+            lambda match: match.group(1),
             text
         )
+        text = re.sub(
+            r"<link='(.*?)'>(.*?)</link>",
+            lambda match: match.group(2),
+            text
+        )
+    else:
+        text = re.sub(
+            r"<link=literal>(.*?)</link>",
+            lambda match: buildHTMLLinkForText(match.group(1), linkLookup, previewLookup),
+            text
+        )
+        text = re.sub(
+            r"<link='(.*?)'>(.*?)</link>",
+            lambda match: buildHTMLLinkForText(match.group(2), linkLookup, previewLookup),
+            text
+        )
+ 
+    
+    
+    
+    
+    
     
     return text
 
@@ -305,8 +351,7 @@ def buildHTMLForSymbol(SymbolID):
         return f"&#x{SymbolID};"
     
     return f'<img src="../../Assets/Symbols/{source}" alt="{SymbolID}" class="Symbol">'
-    
-    pass
+
 
 
 ## toc generation functions

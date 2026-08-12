@@ -66,7 +66,7 @@ def loadPreviewData():
 	return data
 
 
-def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None, PreviewLookup=None):
+def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None, previewLookup=None):
 
 	TechTree = CivilopediaData.TechChooser(title=raw_TechTreeData["title"])
 	for tech_data in raw_TechTreeData["Techs"]:
@@ -85,7 +85,7 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 			contentType = datapoint.get("type", "")
 			if contentType == "buttonlinkAt":
 				datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
-				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint)
+				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint,isTree=True)
 			elif contentType == "TechBoxLabel":
 				# since TechBoxLabel coordinates are not relative to the TechBox, we need to adjust them.
 				datapoint["x"] -= TechBox.x
@@ -103,7 +103,7 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 
 
 
-def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup=None, PreviewLookup=None):
+def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup=None, previewLookup=None):
 	
 	civilopedia = CivilopediaData.Civilopedia(title=raw_CivilopediaData["title"])
 	
@@ -119,7 +119,7 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 				UpgradeTree.height = max(UpgradeTree.height, element["y"] + element["height"])
 				if element.get("type", "") == "buttonlinkAt":
 					element["source"] = convertButtonImage(element, buttonLookup)
-					TreeContent += buildHTMLLinkForButton(element)
+					TreeContent += buildHTMLLinkForButton(element, isTree=True)
 			UpgradeTree.content = TreeContent
 			civilopedia.UpgradeTrees.append(UpgradeTree)
 			continue
@@ -129,27 +129,28 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 			entry = CivilopediaData.Entry(title=entry_data["title"])
 			
 			
-			for i, panel_data in enumerate(entry_data["PageContent"]):
+			for i, panel_data in enumerate(entry_data.get("PageContent", [])):
 				
 				Panelcontent = ""
 				
 				# if there is another panel before the listbox, attach the infos to the panel.
 				# if there is no panel before, like for the Culture Levels, attach the infos to the listbox panel.
+				
 				if panel_data.get("type", "") == "listbox":
 					panel_data["content"].pop(0) # remove the first element, since it should contain the title too.
 					texts = [content.get("text", "") for content in panel_data["content"] if content.get("text", "") not in ["", "<font=3></font>"]]
-					text = resolveTextFormatting(", ".join(texts), linkLookup)
+					text = resolveTextFormatting(", ".join(texts), linkLookup, previewLookup)
 					if entry.PageContent != []:
 						entry.PageContent[0].PanelContent += text
 					else:
 						Panelcontent += text
 				else:
-					for datapoint in panel_data["content"]:
+					for datapoint in panel_data.get("content", []):
 						
 						contentType = datapoint.get("type", "")
 						
 						if contentType == "text":
-							Panelcontent += resolveTextFormatting(datapoint.get("text", ""), linkLookup)
+							Panelcontent += resolveTextFormatting(datapoint.get("text", ""), linkLookup, previewLookup)
 							
 						elif contentType == "button":
 							datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
@@ -164,12 +165,15 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 							Panelcontent += buildHTMLLinkForButton(datapoint)
 							
 						elif contentType == "listboxstring":
-							Panelcontent += resolveTextFormatting(datapoint.get("text", ""), linkLookup)
+							Panelcontent += resolveTextFormatting(datapoint.get("text", ""), linkLookup, previewLookup)
+							Panelcontent += "<br>"
+
 				
 				if Panelcontent != "" or panel_data["title"] != "":
 					panel = CivilopediaData.Panel(title=panel_data["title"], PanelContent=Panelcontent)
 					entry.PageContent.append(panel)
-			entry.PageContent[0].title += entry_data["title"]  # set the title of the first panel to the title of the entry
+			if entry.PageContent != []:
+				entry.PageContent[0].title += entry_data["title"]  # set the title of the first panel to the title of the entry
 			category.entries.append(entry)
 		
 		civilopedia.Categories.append(category)
@@ -186,17 +190,17 @@ if __name__ == "__main__":
 	raw_TechTreeData = loadTechTreeData()
 	buttonLookup = buildButtonLookup()
 	linkLookup = buildLinkLookup(raw_CivilopediaData)
-	PreviewLookup ={}   #loadPreviewData()
+	previewLookup = buildPreviewLookup(raw_CivilopediaData)
 	extractGlyphsFromFontAtlas()
 	print("Finished loading raw data and preparing lookups.")
 	
 	
 	# building CivilopediaData ...
-	CivilopediaData_processed = measure(buildCivilopediaData, raw_CivilopediaData, buttonLookup, linkLookup, PreviewLookup)
+	CivilopediaData_processed = measure(buildCivilopediaData, raw_CivilopediaData, buttonLookup, linkLookup, previewLookup)
 	measure(renderCategories, CivilopediaData_processed)
 	measure(renderUpgradeTrees, CivilopediaData_processed)
 	
 	# building TechTreeData ...
-	TechTreeData_processed = measure(buildTechTreeData, raw_TechTreeData, buttonLookup,linkLookup, PreviewLookup)
+	TechTreeData_processed = measure(buildTechTreeData, raw_TechTreeData, buttonLookup,linkLookup, previewLookup)
 	print(f"TechTree contains {len(TechTreeData_processed.techs)} techs and {len(TechTreeData_processed.arrows)} arrows.")
 	measure(renderTechChooser, TechTreeData_processed)
