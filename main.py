@@ -77,7 +77,15 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 			width=tech_data["width"],
 			height=tech_data["height"],
 		)
-
+		previewstyle = ""
+		if int(TechBox.x) < 200:
+			previewstyle += f"left: 100%;"
+		else:
+			previewstyle += f"right: 100%;"
+		if int(TechBox.y) < 200:
+			previewstyle += f"top: 0;"
+		else:
+			previewstyle += f"bottom: 0;" 
 		TechTree.width = max(TechTree.width, TechBox.x + TechBox.width)
 		TechTree.height = max(TechTree.height, TechBox.y + TechBox.height)
   
@@ -85,7 +93,7 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 			contentType = datapoint.get("type", "")
 			if contentType == "buttonlinkAt":
 				datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
-				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint,isTree=True)
+				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint,isTree = True, previewstyle = previewstyle)
 			elif contentType == "TechBoxLabel":
 				# since TechBoxLabel coordinates are not relative to the TechBox, we need to adjust them.
 				datapoint["x"] -= TechBox.x
@@ -117,9 +125,18 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 			for element in category_data["Entries"][0]["PageContent"][0]["content"]:
 				UpgradeTree.width = max(UpgradeTree.width, element["x"] + element["width"])
 				UpgradeTree.height = max(UpgradeTree.height, element["y"] + element["height"])
+				previewstyle = ""
+				if int(element["x"]) < 200:
+					previewstyle += f"left: 100%;"
+				else:
+					previewstyle += f"right: 100%;"
+				if int(element["y"]) < 200:
+					previewstyle += f"top: 0;"
+				else:
+					previewstyle += f"bottom: 0;" 
 				if element.get("type", "") == "buttonlinkAt":
 					element["source"] = convertButtonImage(element, buttonLookup)
-					TreeContent += buildHTMLLinkForButton(element, isTree=True)
+					TreeContent += buildHTMLLinkForButton(element, isTree=True, previewstyle=previewstyle)
 			UpgradeTree.content = TreeContent
 			civilopedia.UpgradeTrees.append(UpgradeTree)
 			continue
@@ -172,6 +189,7 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 				if Panelcontent != "" or panel_data["title"] != "":
 					panel = CivilopediaData.Panel(title=panel_data["title"], PanelContent=Panelcontent)
 					entry.PageContent.append(panel)
+				
 			if entry.PageContent != []:
 				entry.PageContent[0].title += entry_data["title"]  # set the title of the first panel to the title of the entry
 			category.entries.append(entry)
@@ -197,6 +215,8 @@ if __name__ == "__main__":
 	
 	# building CivilopediaData ...
 	CivilopediaData_processed = measure(buildCivilopediaData, raw_CivilopediaData, buttonLookup, linkLookup, previewLookup)
+	
+ 
 	measure(renderCategories, CivilopediaData_processed)
 	measure(renderUpgradeTrees, CivilopediaData_processed)
 	

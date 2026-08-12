@@ -96,7 +96,7 @@ def convertButtonImage(button, buttonLookup):
 
 ## Button link processing functions
 
-def buildHTMLLinkForButton(button, isTree = False):
+def buildHTMLLinkForButton(button, isTree = False, previewstyle = ""):
     """
     Given a button, return HTML code to display the button. This includes a link to the entry.
     If the button has a postion and size, these will be considered in the HTML code.
@@ -109,6 +109,7 @@ def buildHTMLLinkForButton(button, isTree = False):
     text = entryName.replace('-', ' ')
     
     style =""
+    containerstyle = ""
     if isTree:
         x = button["x"]
         y = button["y"]
@@ -116,12 +117,15 @@ def buildHTMLLinkForButton(button, isTree = False):
         height = button["height"]
         buttonstyle = f"width: {width}px; height: {height}px;"
         containerstyle = f"position:absolute; left: {x}px; top: {y}px; "
+        # make sure previews are placed correctly
+           
+ 
     previewText = resolveTextFormatting(button.get("previewText", ""), isPreview=True)
     if previewText != "" and isTree:
-        return f'<span class="button-with-preview" style="{containerstyle}"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}"></a><span class="preview-text">{previewText}</span></span>'
+        return f'<span class="button-with-preview" style="{containerstyle}"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}"></a><span class="preview-text" style="{previewstyle}">{previewText} </span></span>'
     elif previewText != "" and not isTree:
-        return f'<span class="button-with-preview"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a><span class="preview-text">{previewText}</span></span>'
-    elif previewText =="":
+        return f'<span class="button-with-preview" ><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a><span class="preview-text">{previewText}</span></span>'
+    elif previewText == "":
         return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a>'
     
     
@@ -229,9 +233,10 @@ def resolveTextFormatting(text, linkLookup = {}, previewLookup = {}, isPreview=F
     # replace <b> and </b> with <strong> and </strong>
     text = text.replace("<b>", "<strong>").replace("</b>", "</strong>")
     
-    # replace color tags with <span> tags
+    # replace color tags with <span> tags while preserving inner content
     def replace_color(match):
-        r, g, b, a = map(int, match.groups())
+        r, g, b, a, content = match.groups()
+        r, g, b, a = map(int, (r, g, b, a))
 
         if not all(0 <= value <= 255 for value in (r, g, b, a)):
             return match.group(0)
@@ -239,16 +244,15 @@ def resolveTextFormatting(text, linkLookup = {}, previewLookup = {}, isPreview=F
         alpha = a / 255
 
         if a == 255:
-            return f'<span style="color: rgb({r} {g} {b});">'
+            return f'<span style="color: rgb({r} {g} {b});">{content}</span>'
 
-        return f'<span style="color: rgb({r} {g} {b} / {alpha:.3f});">'
+        return f'<span style="color: rgb({r} {g} {b} / {alpha:.3f});">{content}</span>'
 
     text = re.sub(
-        r"<color=(\d+),(\d+),(\d+),(\d+)>",
+        r"<color=(\d+),(\d+),(\d+),(\d+)>(.*?)</color>",
         replace_color,
-        text
+        text,
     )
-    text = text.replace("</color>", "</span>")
     
     # replace hexadecimal symbol IDs like \u01c6 with the corresponding HTML code for the symbol
     
