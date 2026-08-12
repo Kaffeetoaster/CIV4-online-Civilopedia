@@ -14,7 +14,7 @@
 {%macro render_TechTree(TechTree)%}
 # Tech Tree
 <div markdown="1" class="Entry TechTree">
-<div markdown="1" class="TechTreeCanvas" style="position: relative; width:{{TechTree.width}}px; height:{{TechTree.width}}px;">
+<div markdown="1" class="TechTreeCanvas" style="position: relative; width:{{TechTree.width}}px; height:{{TechTree.height}}px;">
 
 {% for arrow in TechTree.arrows %}
 {{ arrow }} {# contains the arrows between the techs #}
@@ -29,7 +29,11 @@
 
 </div>
 </div>
+<script>
+document.querySelector(".wy-nav-content").classList.add("tech-tree");
+</script>
 {% endmacro %}
+
 
 
 {{render_TechTree(TechTree)}}
