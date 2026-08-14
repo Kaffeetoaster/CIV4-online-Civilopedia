@@ -94,61 +94,62 @@ def convertButtonImage(button, buttonLookup):
     return str(file_path)
     
 
-## Button link processing functions
+## Button  and Button link processing functions
 
-def buildHTMLLinkForButton(button, isTree = False, previewstyle = ""):
+def buildHTMLForButton(button, isTree = False, previewstyle = ""):
     """
-    Given a button, return HTML code to display the button. This includes a link to the entry.
-    If the button has a postion and size, these will be considered in the HTML code.
+    Given a button, decides which HTML generation function to call, based on whether the button has a link, preview and absolute position or not.
+    returns the HTML code to display the button.
     """
-    if button.get("link", "") == "":
-        return buildHTMLForButton(button)
-    categoryName,entryName = button["link"].split("#")
-    shortLink = f"{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
-    link = f"../../Categories/{shortLink}"
-    text = entryName.replace('-', ' ')
+    isLink = button.get("link", "") != ""
+    hasPreview = button.get("previewText", "") != ""
     
-    style =""
-    containerstyle = ""
-    if isTree:
-        x = button["x"]
-        y = button["y"]
-        width = button["width"]
-        height = button["height"]
-        buttonstyle = f"width: {width}px; height: {height}px;"
-        containerstyle = f"position:absolute; left: {x}px; top: {y}px; "
-        # make sure previews are placed correctly
-           
- 
-    previewText = resolveTextFormatting(button.get("previewText", ""), isPreview=True)
-    if previewText != "" and isTree:
-        return f'<span class="button-with-preview" style="{containerstyle}"><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}"></a><span class="preview-text" style="{previewstyle}">{previewText} </span></span>'
-    elif previewText != "" and not isTree:
-        return f'<span class="button-with-preview" ><a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a><span class="preview-text">{previewText}</span></span>'
-    elif previewText == "":
-        return f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{style}"></a>'
-    
-    
-    
-    
-def buildHTMLForButton(button):   
-    """
-    Given a button, return HTML code to display the button. This does not include a link to the entry.
-    If the button has a postion and size, these will be considered in the HTML code.
-    """
-    try:
+    # setting up all building blocks
+    if isLink:
+        categoryName,entryName = button["link"].split("#")
+        if entryName.startswith("The-"): 
+            entryName = entryName[4:] # remove "The-" from the entry name. For wonders, kinda RFC DOC specific.
+        shortLink = f"{categoryName.replace(' ', '-')}/#{entryName.replace(' ', '-').lower()}"
+        link = f"../../Categories/{shortLink}"
+        text = entryName.replace('-', ' ')
+    else: 
         text = Path(button["source"]).stem
-    except Exception as e:
-        #print(f"Error getting button source: {e}. Button: {button}")
-        text = ""
-    style =""
-    if button.get("x",-1)!=-1 and button.get("y",-1)!=-1 and button.get("width",-1)!=-1 and button.get("height",-1)!=-1:
-        x = button["x"]
-        y = button["y"]
-        width = button["width"]
-        height = button["height"]
-        style = f"position:absolute; left: {x}px; top: {y}px; width: {width}px; height: {height}px;"
-    return f'<img src="../../Assets/{button["source"]}" alt="{text}" style="{style}">'
+        
+    if isTree:
+        buttonstyle = f"width: {button['width']}px; height: {button['height']}px;"
+        containerstyle = f"position:absolute; left: {button['x']}px; top: {button['y']}px; "
+        
+    if hasPreview:
+        previewText = resolveTextFormatting(button.get("previewText", ""), isPreview=True)
+    
+    # case differentiation based on button properties
+    if isTree:
+        if isLink:
+            # assume also has a preview, since its a link
+            return (f'<span class="button-with-preview" style="{containerstyle}">'
+                    f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}"></a>'
+                    f'<span class="preview-text" style="{previewstyle}">{previewText} </span></span>')
+        elif hasPreview:
+            return (f'<span class="button-with-preview" style="{containerstyle}">'
+                    f'<img src="../../Assets/{button["source"]}" alt="{text}" style="{buttonstyle}">'
+                    f'<span class="preview-text" style="{previewstyle}">{previewText}</span></span>')
+        else:
+            # no link, no preview, so the arrows
+            return f'<img src="../../Assets/{button["source"]}" alt="{text}" style="{containerstyle + buttonstyle}">'
+    else:
+        if isLink:
+            # assume also has a preview, since its a link
+            return (f'<span class="button-with-preview">'
+                    f'<a href="{link}" title="{text}"><img src="../../Assets/{button["source"]}" alt="{text}"></a>'
+                    f'<span class="preview-text">{previewText}</span></span>')
+        elif hasPreview:
+            return (f'<span class="button-with-preview">'
+                    f'<img src="../../Assets/{button["source"]}" alt="{text}">'
+                    f'<span class="preview-text">{previewText}</span></span>')
+        else:
+            return f'<img src="../../Assets/{button["source"]}" alt="{text}">'
+
+
 
 ## text link processing functions
 
@@ -166,7 +167,7 @@ def buildLinkLookup(CivilopediaData):
 
 def buildPreviewLookup(CivilopediaData):
     """
-    Walks over each content element in the Civilopedia and maps its modifed link to its previewText, if it has one.
+    Walks over each content element in the Civilopedia and maps its modified link to its previewText, if it has one.
     This also formats the previewText.
     """
     dict_previewLookup = {}
@@ -254,8 +255,10 @@ def resolveTextFormatting(text, linkLookup = {}, previewLookup = {}, isPreview=F
         text,
     )
     
-    # replace hexadecimal symbol IDs like \u01c6 with the corresponding HTML code for the symbol
+    # format TXT_KEY_HELP... often contain sth like [ICON_BULLET] or [LINK=CONCEPT_MAPS]World Map[\LINK]
     
+    
+    # replace hexadecimal symbol IDs like \u01c6 with the corresponding HTML code for the symbol
     text = re.sub(
         r"\\u([0-9a-fA-F]{4})",
         lambda match: buildHTMLForSymbol(match.group(1)),

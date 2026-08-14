@@ -93,7 +93,7 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 			contentType = datapoint.get("type", "")
 			if contentType == "buttonlinkAt":
 				datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
-				TechBox.TechBoxContent += buildHTMLLinkForButton(datapoint,isTree = True, previewstyle = previewstyle)
+				TechBox.TechBoxContent += buildHTMLForButton(datapoint,isTree = True, previewstyle = previewstyle)
 			elif contentType == "TechBoxLabel":
 				# since TechBoxLabel coordinates are not relative to the TechBox, we need to adjust them.
 				datapoint["x"] -= TechBox.x
@@ -104,7 +104,7 @@ def buildTechTreeData(raw_TechTreeData=None, buttonLookup=None, linkLookup=None,
 			
 	for arrow in raw_TechTreeData.get("Arrows", []):
 		arrow["source"] = convertButtonImage(arrow, buttonLookup)
-		TechTree.arrows.append(buildHTMLForButton(arrow))
+		TechTree.arrows.append(buildHTMLForButton(arrow, isTree=True))
 			
 			
 	return TechTree
@@ -135,8 +135,8 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 				else:
 					previewstyle += f"bottom: 0;" 
 				if element.get("type", "") == "buttonlinkAt":
-					element["source"] = convertButtonImage(element, buttonLookup)
-					TreeContent += buildHTMLLinkForButton(element, isTree=True, previewstyle=previewstyle)
+					element["source"] = convertButtonImage(element, buttonLookup)  
+					TreeContent += buildHTMLForButton(element, isTree=True, previewstyle=previewstyle)
 			UpgradeTree.content = TreeContent
 			civilopedia.UpgradeTrees.append(UpgradeTree)
 			continue
@@ -179,7 +179,7 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 							
 						elif contentType == "buttonlink" or contentType == "buttonlinkAt":
 							datapoint["source"] = convertButtonImage(datapoint, buttonLookup)
-							Panelcontent += buildHTMLLinkForButton(datapoint)
+							Panelcontent += buildHTMLForButton(datapoint)
 							
 						elif contentType == "listboxstring":
 							Panelcontent += resolveTextFormatting(datapoint.get("text", ""), linkLookup, previewLookup)
