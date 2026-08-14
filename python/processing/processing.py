@@ -96,7 +96,7 @@ def convertButtonImage(button, buttonLookup):
 
 ## Button  and Button link processing functions
 
-def buildHTMLForButton(button, isTree = False, previewstyle = ""):
+def buildHTMLForButton(button, isTree = False, previewpos = (True, True)):
     """
     Given a button, decides which HTML generation function to call, based on whether the button has a link, preview and absolute position or not.
     returns the HTML code to display the button.
@@ -121,6 +121,11 @@ def buildHTMLForButton(button, isTree = False, previewstyle = ""):
         
     if hasPreview:
         previewText = resolveTextFormatting(button.get("previewText", ""), isPreview=True)
+        previewstyle = ""
+        left, top = previewpos
+        previewstyle += "left: 100%;" if left else "right: 100%;"
+        previewstyle += "top: 0;" if top else "bottom: 0;"
+        
     
     # case differentiation based on button properties
     if isTree:
