@@ -2,7 +2,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import json
 
-from config import INPUT_PATH, OUTPUT_PATH
+from config import INPUT_PATH_RAW_DATA, OUTPUT_PATH
 from python.measure_duration import measure, start_new_log
 import python.CivilopediaData as CivilopediaData
 from python.processing.processing import *
@@ -51,17 +51,17 @@ def renderTechChooser(TechTree, result_file = OUTPUT_PATH / "Categories" / "Tech
 	
 	
 def loadTechTreeData():
-	with open("data/TechChooserData_raw.json", "r", encoding="utf-8") as f:
+	with open(INPUT_PATH_RAW_DATA / "TechChooserData_raw.json", "r", encoding="utf-8") as f:
 		data = json.load(f)
 	return data    
 
 def loadCivilopediaData():
-	with open("data/CivilopediaData_raw.json", "r", encoding="utf-8") as f:
+	with open(INPUT_PATH_RAW_DATA / "CivilopediaData_raw.json", "r", encoding="utf-8") as f:
 		data = json.load(f)
 	return data
 
 def loadPreviewData():
-	with open("data/PreviewData_raw.json", "r", encoding="utf-8") as f:
+	with open(INPUT_PATH_RAW_DATA / "PreviewData_raw.json", "r", encoding="utf-8") as f:
 		data = json.load(f)
 	return data
 
@@ -129,8 +129,9 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 	 
 		category = CivilopediaData.Category(title=category_data["Category"])
 		for entry_data in category_data["Entries"]:
-			entry = CivilopediaData.Entry(title=entry_data["title"])
+			entry = CivilopediaData.Entry(title=resolveTextFormatting(entry_data["title"], linkLookup, previewLookup))
 			
+    			
 			
 			for i, panel_data in enumerate(entry_data.get("PageContent", [])):
 				
@@ -177,7 +178,7 @@ def buildCivilopediaData(raw_CivilopediaData=None, buttonLookup=None, linkLookup
 					entry.PageContent.append(panel)
 				
 			if entry.PageContent != []:
-				entry.PageContent[0].title += entry_data["title"]  # set the title of the first panel to the title of the entry
+				entry.PageContent[0].title += entry.title  # set the title of the first panel to the title of the entry
 			category.entries.append(entry)
 		
 		civilopedia.Categories.append(category)
